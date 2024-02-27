@@ -1,0 +1,9 @@
+---
+- name: Install Elasticsearch
+  import_playbook: elasticsearch_install.yml
+
+- name: Install Logstash
+  import_playbook: logstash_install.yml
+
+- name: Install Kibana
+  import_playbook: kibana_install.yml

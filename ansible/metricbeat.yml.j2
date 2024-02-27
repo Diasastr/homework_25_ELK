@@ -1,0 +1,35 @@
+# metricbeat.yml.j2
+metricbeat.config.modules:
+  # Glob pattern for configuration loading
+  path: ${path.config}/modules.d/*.yml
+  # Set to true to enable config reloading
+  reload.enabled: false
+
+# Setup Metricbeat to send output to Elasticsearch
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["{{ elasticsearch_host }}:{{ elasticsearch_port }}"]
+  protocol: "http"
+
+# ================================= Processors =================================
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+# =============================== X-Pack Monitoring ===============================
+# Metricbeat can export internal metrics to a central Elasticsearch monitoring
+# cluster.  This requires xpack monitoring to be enabled in Elasticsearch.
+xpack.monitoring.enabled: false
+
+# ============================= Dashboards =====================================
+# These settings control loading the sample dashboards to the Kibana index. Loading
+# the dashboards is disabled by default and can be enabled either by setting the
+# options here or by using the `-setup` CLI flag or the `setup` command.
+setup.dashboards.enabled: true
+
+# =============================== Kibana =====================================
+# Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
+# This requires a Kibana endpoint configuration.
+setup.kibana:
+  host: "http://{{ kibana_host }}:{{ kibana_port }}"

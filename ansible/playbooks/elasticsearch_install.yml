@@ -1,0 +1,26 @@
+---
+- name: Install Elasticsearch
+  hosts: elk
+  become: true
+  tasks:
+    - name: Import Elasticsearch GPG Key
+      ansible.builtin.apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+
+    - name: Add Elasticsearch Repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+        state: present
+        update_cache: yes
+
+    - name: Install Elasticsearch
+      ansible.builtin.apt:
+        name: elasticsearch
+        state: latest
+
+    - name: Configure Elasticsearch to Start on Boot
+      ansible.builtin.systemd:
+        name: elasticsearch
+        enabled: yes
+        state: started

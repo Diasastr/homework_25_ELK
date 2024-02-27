@@ -1,0 +1,54 @@
+---
+---
+- name: Install and Configure Metricbeat
+  hosts: all
+  become: true
+
+  vars:
+    metricbeat_config_template: ./ansible/metricbeat.yml.j2
+    metricbeat_config_path: /etc/metricbeat/metricbeat.yml
+
+  tasks:
+    - name: Install Metricbeat
+      ansible.builtin.apt:
+        name: metricbeat
+        state: latest
+      notify: restart metricbeat
+
+    - name: Copy Metricbeat configuration
+      ansible.builtin.template:
+        src: "{{ metricbeat_config_template }}"
+        dest: "{{ metricbeat_config_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart metricbeat
+
+    - name: Enable system module
+      ansible.builtin.command:
+        cmd: metricbeat modules enable system
+      args:
+        chdir: /etc/metricbeat/
+      notify: restart metricbeat
+
+    - name: Setup Metricbeat (dashboards, index pattern)
+      ansible.builtin.command:
+        cmd: metricbeat setup
+      args:
+        chdir: /etc/metricbeat/
+      when: inventory_hostname in groups['elk']
+      # Adjust this condition based on your setup to run only where needed.
+
+    - name: Ensure Metricbeat is enabled and running
+      ansible.builtin.systemd:
+        name: metricbeat
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart metricbeat
+      ansible.builtin.systemd:
+        name: metricbeat
+        state: restarted
+        enabled: yes
+

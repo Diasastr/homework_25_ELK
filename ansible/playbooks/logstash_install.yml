@@ -1,0 +1,26 @@
+---
+- name: Install Logstash
+  hosts: elk
+  become: true
+  tasks:
+    - name: Import Logstash GPG Key
+      ansible.builtin.apt_key:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        state: present
+
+    - name: Add Logstash Repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+        state: present
+        update_cache: yes
+
+    - name: Install Logstash
+      ansible.builtin.apt:
+        name: logstash
+        state: latest
+
+    - name: Configure Logstash to Start on Boot
+      ansible.builtin.systemd:
+        name: logstash
+        enabled: yes
+        state: started

@@ -1,0 +1,32 @@
+heartbeat.monitors:
+- type: http
+  id: my-http-monitor
+  name: My HTTP Monitor
+  urls: ["http://localhost:9200"]
+  schedule: '@every 10s'
+  timeout: 2s
+
+- type: icmp
+  id: my-icmp-monitor
+  name: My ICMP Monitor
+  hosts: ["localhost"]
+  schedule: '@every 10s'
+  timeout: 2s
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.kibana:
+  host: "http://localhost:5601"
+  # Update the Kibana host URL according to your setup.
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic"  # Default Elasticsearch username. Change as per your setup.
+  password: "changeme"  # Default Elasticsearch password. Change as per your setup.
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+
+# It is highly recommended to use secure settings, so adjust the username and password accordingly.

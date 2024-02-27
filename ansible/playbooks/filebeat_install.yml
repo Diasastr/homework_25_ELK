@@ -1,0 +1,43 @@
+---
+- name: Install and Configure Filebeat
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Download and install Filebeat
+      ansible.builtin.apt:
+        name: filebeat
+        state: latest
+      notify: restart filebeat
+
+    - name: Copy Filebeat configuration file
+      ansible.builtin.copy:
+        src: ./ansible/filebeat.yml
+        dest: /etc/filebeat/filebeat.yml
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart filebeat
+
+    - name: Enable Filebeat system module
+      ansible.builtin.command:
+        cmd: filebeat modules enable system
+      notify: restart filebeat
+
+    - name: Set up Filebeat dashboards
+      ansible.builtin.command:
+        cmd: filebeat setup --dashboards
+      when: inventory_hostname in groups['elk']
+
+    - name: Enable and start Filebeat service
+      ansible.builtin.systemd:
+        name: filebeat
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart filebeat
+      ansible.builtin.systemd:
+        name: filebeat
+        state: restarted
+        enabled: yes

@@ -1,0 +1,29 @@
+---
+- name: Install and Configure Heartbeat
+  hosts: all
+  become: true
+  tasks:
+    - name: Download and install Heartbeat
+      ansible.builtin.apt:
+        name: heartbeat-elastic
+        state: latest
+
+    - name: Copy Heartbeat configuration file
+      ansible.builtin.template:
+        src: ./ansible/heartbeat.yml
+        dest: /etc/heartbeat/heartbeat.yml
+      notify:
+        - restart heartbeat
+
+    - name: Enable and Start Heartbeat
+      ansible.builtin.systemd:
+        name: heartbeat
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart heartbeat
+      ansible.builtin.systemd:
+        name: heartbeat
+        state: restarted
+        enabled: yes
